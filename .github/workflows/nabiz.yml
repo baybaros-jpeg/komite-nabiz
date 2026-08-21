@@ -1,0 +1,64 @@
+name: Nabız
+
+# GitHub cron UTC calisir. Turkiye UTC+3 oldugu icin:
+#   09-18 UTC  =  12:00 - 21:59 Turkiye saati  (gunde 10 saat)
+#
+# Neden 10 saat: Render ucretsiz katmani calisma alanina AYDA 750 ornek-saati
+# veriyor ve bu kota servis basina degil, hesabin tamami icin. Iki arka uc
+# 10 sa/gun x 30 gun = 600 saat eder; 150 saat marj kalir. 12 saate cikarsak
+# 720 saat olur ve marj 30 saate duser; kota biterse Render TUM ucretsiz
+# servisleri ay sonuna kadar askiya alir.
+#
+# Neden 10 dakikada bir: Render 15 dakika hareketsizlikte servisi uyutuyor.
+
+on:
+  schedule:
+    - cron: "*/10 9-18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  yokla:
+    name: Arka uclari yokla
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+
+    steps:
+      - name: Yoklama
+        run: |
+          set -u
+          hatali=0
+
+          yokla() {
+            ad="$1"; url="$2"
+            # Uyandirma 30 sn+ surebilir, o yuzden cömert bir zaman asimi.
+            cikti=$(curl -sS -o /dev/null \
+                      -w '%{http_code} %{time_total}' \
+                      --max-time 120 "$url" 2>/dev/null || echo "000 0")
+            kod="${cikti%% *}"; sure="${cikti##* }"
+
+            if [ "$kod" = "200" ]; then
+              # 5 saniyeden uzun surduyse servis uykudan uyanmis demektir
+              uyari=""
+              case "$sure" in
+                [5-9].*|[1-9][0-9].*) uyari="  <- uykudan uyandi" ;;
+              esac
+              printf '  OK    %-5s %ss%s\n' "$ad" "$sure" "$uyari"
+            else
+              printf '  HATA  %-5s durum=%s sure=%ss\n' "$ad" "$kod" "$sure"
+              hatali=$((hatali + 1))
+            fi
+          }
+
+          echo "Yoklama — $(TZ=Europe/Istanbul date '+%Y-%m-%d %H:%M %Z')"
+          yokla MTP https://itso-secim-api.onrender.com/api/
+          yokla MOG https://mobilya-oturma-grubu-api.onrender.com/api/
+
+          if [ "$hatali" -gt 0 ]; then
+            echo
+            echo "$hatali servis yanit vermedi."
+            echo "GitHub bu basarisizligi e-posta ile bildirir."
+            exit 1
+          fi
