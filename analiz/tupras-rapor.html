@@ -1,0 +1,647 @@
+<title>TÜPRAŞ Yatırım Notu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+:root{
+  --ground:#F4F7F6;
+  --surface:#FFFFFF;
+  --sunken:#EAF0EF;
+  --ink:#0D1A1E;
+  --ink-2:#33474C;
+  --ink-3:#647B80;
+  --rule:#D3DEDC;
+  --rule-2:#E4ECEA;
+  --accent:#0B6E77;
+  --accent-soft:#DCEDEE;
+  --pos:#1E7A4D;
+  --pos-soft:#DDEFE4;
+  --warn:#B5761A;
+  --warn-soft:#F6EBD6;
+  --neg:#AE3230;
+  --neg-soft:#F7E2E1;
+  --shadow:0 1px 2px rgba(13,26,30,.05), 0 8px 24px -16px rgba(13,26,30,.28);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1214;
+    --surface:#111D20;
+    --sunken:#16262A;
+    --ink:#E7EFED;
+    --ink-2:#B3C4C4;
+    --ink-3:#7B9295;
+    --rule:#25383C;
+    --rule-2:#1C2E32;
+    --accent:#4FBCC6;
+    --accent-soft:#0E3238;
+    --pos:#5CC48B;
+    --pos-soft:#0F3226;
+    --warn:#E0A64A;
+    --warn-soft:#33260F;
+    --neg:#EC7A76;
+    --neg-soft:#361A1A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1214;
+  --surface:#111D20;
+  --sunken:#16262A;
+  --ink:#E7EFED;
+  --ink-2:#B3C4C4;
+  --ink-3:#7B9295;
+  --rule:#25383C;
+  --rule-2:#1C2E32;
+  --accent:#4FBCC6;
+  --accent-soft:#0E3238;
+  --pos:#5CC48B;
+  --pos-soft:#0F3226;
+  --warn:#E0A64A;
+  --warn-soft:#33260F;
+  --neg:#EC7A76;
+  --neg-soft:#361A1A;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:860px;margin:0 auto;padding:0 24px 96px}
+h1,h2,h3,.disp{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+.mono,td.num,th.num,.tick{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:2px solid var(--ink);padding:40px 0 18px;margin-bottom:0}
+.mast-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 18px;margin-bottom:22px}
+.tick-badge{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;letter-spacing:.1em;
+  background:var(--ink);color:var(--ground);padding:5px 10px;border-radius:3px;
+}
+.mast-meta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3);letter-spacing:.04em;margin-left:auto}
+h1{font-size:clamp(38px,7vw,60px);line-height:1.02;letter-spacing:-.025em;font-weight:700;margin:0 0 14px}
+.dek{font-size:19px;color:var(--ink-2);max-width:62ch;margin:0 0 26px}
+.dek em{font-style:italic;color:var(--ink)}
+
+/* ---------- verdict pair ---------- */
+.verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:34px}
+.verdict{background:var(--surface);padding:18px 20px 20px}
+.verdict .horizon{font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:8px}
+.verdict .call{font-family:Archivo,sans-serif;font-size:26px;font-weight:700;letter-spacing:-.015em;line-height:1.1;margin-bottom:8px}
+.verdict.wait .call{color:var(--warn)}
+.verdict.buy .call{color:var(--pos)}
+.verdict p{margin:0;font-size:15px;line-height:1.5;color:var(--ink-2)}
+
+/* ---------- gauge strip ---------- */
+.gauges{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;
+  margin:0 0 44px;
+}
+.gauge{background:var(--surface);padding:13px 14px 14px;display:flex;flex-direction:column;gap:3px}
+.gauge dt{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0}
+.gauge dd{margin:0;font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.gauge .sub{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);line-height:1.3}
+.up{color:var(--pos)} .down{color:var(--neg)} .flat{color:var(--warn)}
+
+/* ---------- sections ---------- */
+section{margin:0 0 52px;scroll-margin-top:20px}
+.eyebrow{
+  font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:7px;
+}
+h2{font-size:clamp(25px,4vw,33px);line-height:1.14;letter-spacing:-.02em;font-weight:700;margin:0 0 4px}
+.h2-rule{height:2px;background:var(--ink);width:44px;margin:14px 0 22px}
+h3{font-size:17px;font-weight:600;letter-spacing:-.005em;margin:30px 0 8px}
+p{margin:0 0 15px;max-width:66ch}
+ul{margin:0 0 16px;padding-left:0;list-style:none;max-width:66ch}
+ul li{position:relative;padding-left:20px;margin-bottom:9px}
+ul li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:2px;background:var(--accent)}
+strong{font-weight:600}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* ---------- figure ---------- */
+figure{margin:26px 0 30px;background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:20px 20px 14px;box-shadow:var(--shadow)}
+figure .cap{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:500;color:var(--ink-3);line-height:1.45;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule-2)}
+figure .cap b{color:var(--ink-2);font-weight:600}
+.svgbox{overflow-x:auto}
+svg{display:block;width:100%;height:auto;min-width:520px}
+.axis{stroke:var(--rule);stroke-width:1}
+.grid{stroke:var(--rule-2);stroke-width:1}
+.tick{font-size:11px;fill:var(--ink-3)}
+.slab{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:600;fill:var(--ink-2)}
+.sval{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;fill:var(--ink)}
+
+/* ---------- tables ---------- */
+.tbl{overflow-x:auto;margin:22px 0 8px;border:1px solid var(--rule);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--rule-2)}
+thead th{
+  font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--sunken);border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+td.num,th.num{text-align:right;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tr.hi td{background:var(--accent-soft);font-weight:600}
+td.lbl{font-family:Archivo,sans-serif;font-weight:500;font-size:14px}
+.pill{
+  display:inline-block;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:3px;white-space:nowrap;
+}
+.p-pos{background:var(--pos-soft);color:var(--pos)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-neg{background:var(--neg-soft);color:var(--neg)}
+.p-neu{background:var(--sunken);color:var(--ink-3)}
+
+/* ---------- levels ladder ---------- */
+.ladder{border:1px solid var(--rule);border-radius:4px;background:var(--surface);overflow:hidden;margin:24px 0 10px}
+.rung{display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:baseline;padding:9px 16px;border-bottom:1px solid var(--rule-2);font-size:14.5px}
+.rung:last-child{border-bottom:0}
+.rung .px{font-family:"IBM Plex Mono",monospace;font-weight:600;font-variant-numeric:tabular-nums}
+.rung .why{color:var(--ink-2);font-size:14px}
+.rung .dist{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3)}
+.rung.res{background:linear-gradient(90deg,var(--neg-soft) 0 3px,transparent 3px)}
+.rung.sup{background:linear-gradient(90deg,var(--pos-soft) 0 3px,transparent 3px)}
+.rung.now{background:var(--ink);color:var(--ground)}
+.rung.now .why,.rung.now .dist{color:var(--ground);opacity:.82}
+.rung.now .px{font-size:17px}
+
+/* ---------- callout ---------- */
+.callout{
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  border-radius:0 4px 4px 0;padding:18px 22px;margin:26px 0;box-shadow:var(--shadow);
+}
+.callout p:last-child{margin-bottom:0}
+.callout .lead{font-family:Archivo,sans-serif;font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:8px}
+.callout.risk{border-left-color:var(--neg)}
+.callout.risk .lead{color:var(--neg)}
+
+/* ---------- plan ---------- */
+.plan{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin:24px 0}
+.step{background:var(--surface);padding:16px 20px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.step .band{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;color:var(--accent);white-space:nowrap;padding-top:1px;min-width:104px}
+.step .body h4{font-family:Archivo,sans-serif;font-size:14.5px;font-weight:600;margin:0 0 4px}
+.step .body p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+
+/* ---------- timeline ---------- */
+.tl{border-left:2px solid var(--rule);margin:24px 0 8px;padding-left:0}
+.tl li{list-style:none;position:relative;padding:0 0 20px 24px;margin:0}
+.tl li::before{content:"";position:absolute;left:-6px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--ground)}
+.tl li.neg::before{background:var(--neg)}
+.tl li.neu::before{background:var(--ink-3)}
+.tl .when{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);display:block;letter-spacing:.03em}
+.tl .what{font-family:Archivo,sans-serif;font-weight:600;font-size:15.5px;display:block;margin:1px 0 3px}
+.tl p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.5;max-width:60ch}
+
+/* ---------- footer ---------- */
+.foot{border-top:2px solid var(--ink);margin-top:56px;padding-top:22px;font-size:13.5px;color:var(--ink-3)}
+.foot h3{font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px;color:var(--ink-3)}
+.foot ul{max-width:none}
+.foot ul li{padding-left:16px;margin-bottom:5px;font-size:13.5px}
+.foot ul li::before{top:.6em;width:6px;background:var(--rule)}
+.disclaim{background:var(--sunken);border-radius:4px;padding:14px 18px;margin-top:20px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:600px){
+  body{font-size:16px}
+  .wrap{padding:0 16px 72px}
+  .rung{grid-template-columns:80px 1fr;row-gap:2px}
+  .rung .dist{grid-column:2}
+  .step{grid-template-columns:1fr;gap:6px}
+}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="mast-top">
+    <span class="tick-badge">BIST · TUPRS</span>
+    <span class="disp" style="font-size:14px;font-weight:600;color:var(--ink-2)">Tüpraş — Türkiye Petrol Rafinerileri A.Ş.</span>
+    <span class="mast-meta">02.09.2026 kapanışı · veri: borsa MCP</span>
+  </div>
+  <h1>Rekor çeyrek, tükenmiş potansiyel</h1>
+  <p class="dek">Tüpraş 2Ç26'da <em>45,9 milyar TL</em> net kâr açıkladı ve net rafineri marjı hedefini 6-7 dolar/varilden 13-15 dolar/varile çıkardı. Hisse iki ayda %73 yükseldi — ve tam olarak analist konsensüsünün üzerine oturdu. Soru artık şirketin iyi olup olmadığı değil; <em>fiyatın hangi marjı fiyatladığı</em>.</p>
+
+  <div class="verdicts">
+    <div class="verdict wait">
+      <span class="horizon">Kısa vade · 0-3 ay</span>
+      <div class="call">Bekle</div>
+      <p>Konsensüs hedefi 397 TL — fiyat orada. Koç blok satışı, 30 Eylül temettü kesintisi ve RSI 67 kısa vadede yukarıyı sınırlıyor. Spot'tan yeni pozisyon açmayın.</p>
+    </div>
+    <div class="verdict buy">
+      <span class="horizon">Orta vade · 6-18 ay</span>
+      <div class="call">Kademeli al</div>
+      <p>10,4 F/K (sektör 14,2), net nakit bilanço, %7,7 temettü verimi ve 3,1 milyar dolarlık FAVÖK beklentisi. Ama tek seferde değil: 385-365 TL bandında üç kademede.</p>
+    </div>
+  </div>
+
+  <dl class="gauges">
+    <div class="gauge"><dt>Fiyat</dt><dd>392,25</dd><span class="sub down">−%2,6 gün</span></div>
+    <div class="gauge"><dt>Piyasa değeri</dt><dd>756</dd><span class="sub">milyar TL</span></div>
+    <div class="gauge"><dt>F/K</dt><dd>10,4×</dd><span class="sub up">sektör 14,2×</span></div>
+    <div class="gauge"><dt>FD/FAVÖK</dt><dd>5,6×</dd><span class="sub flat">zirve FAVÖK</span></div>
+    <div class="gauge"><dt>Temettü</dt><dd>%7,7</dd><span class="sub">2026 toplamı</span></div>
+    <div class="gauge"><dt>RSI-14</dt><dd>67,3</dd><span class="sub flat">aşırı alıma yakın</span></div>
+    <div class="gauge"><dt>52 hafta</dt><dd>117—417</dd><span class="sub">dipten +%234</span></div>
+  </dl>
+</header>
+
+<section>
+  <span class="eyebrow">Kısa cevap</span>
+  <h2>Almalı mısınız?</h2>
+  <div class="h2-rule"></div>
+  <p><strong>Spot fiyattan tek seferde: hayır.</strong> Beş senaryonun olasılık ağırlıklı adil değeri 5,0× FD/FAVÖK çarpanıyla <strong>396 TL</strong> çıkıyor — bugünkü 392,25 TL'nin %1 üzerinde. 27 kurumun ortalama hedefi 397 TL, yurt içi 16 kurumun ortalaması 405 TL. Yani hem model hem de piyasa aynı şeyi söylüyor: <em>iyi haberler fiyatlandı.</em></p>
+  <p><strong>Düzeltmede kademeli alım: evet.</strong> Şirketin kalitesi tartışmasız — net nakit bilanço, %14,1 FAVÖK marjı, 118,8 milyar TL altı aylık serbest nakit akımı ve sektörün %26 altında bir F/K. Bu bir "satılacak hisse" değil, "beklenerek alınacak hisse". Aşağıda 385 / 372 / 365 TL kademeleriyle somut bir plan var.</p>
+  <p><strong>Asıl risk fiyatta değil, marjda.</strong> 13-15 dolar/varillik rehberlik savaş ve arz kesintisi kaynaklı. Marj tarihsel orta çevrimi olan 7-8 dolara dönerse, aynı çarpanla adil değer 317 TL'ye — bugünün %19 altına — iner. Pozisyon büyüklüğünüzü bu senaryoya göre ayarlayın.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Marj hikâyesi</span>
+  <h2>Kârı patlatan tek değişken</h2>
+  <div class="h2-rule"></div>
+  <p>Tüpraş'ın 2Ç26'sında olağanüstü olan operasyonel bir atılım değil; ürün marjlarının şoku. Haziran ortasında İsrail'in Hayfa'daki 197 bin varil/gün kapasiteli rafinerisinin vurulması Akdeniz rafine ürün piyasasını sıkıştırdı. Dizel crack spread bir önceki çeyreğin 27,7 dolar/varil ortalamasından <strong>~45 dolar/varile</strong> fırladı. Avrupa'nın yapısal dizel açığı da bu sıkışıklığı besliyor.</p>
+  <p>Sonuç, şirketin kendi rehberliğini yılın ortasında ikiye katlaması oldu — ve bu, tüm değerleme tartışmasının merkezinde duran tek grafik:</p>
+
+  <figure>
+    <div class="svgbox">
+      <svg viewBox="0 0 730 210" role="img" aria-label="Net rafineri marjı: yıl başı rehberliği 6-7 dolar, 2Ç26 sonrası revize 13-15 dolar, tarihsel orta çevrim 6-8 dolar">
+        <line class="grid" x1="283.3" y1="26" x2="283.3" y2="164"/>
+        <line class="grid" x1="366.7" y1="26" x2="366.7" y2="164"/>
+        <line class="grid" x1="450" y1="26" x2="450" y2="164"/>
+        <line class="grid" x1="533.3" y1="26" x2="533.3" y2="164"/>
+        <line class="grid" x1="616.7" y1="26" x2="616.7" y2="164"/>
+        <line class="grid" x1="700" y1="26" x2="700" y2="164"/>
+
+        <text class="slab" x="8" y="52">Yıl başı rehberliği</text>
+        <rect x="366.7" y="36" width="27.8" height="24" rx="2" fill="var(--ink-3)"/>
+        <text class="sval" x="404" y="53">6—7 $</text>
+
+        <text class="slab" x="8" y="96">2Ç26 sonrası revize</text>
+        <rect x="561.1" y="80" width="55.6" height="24" rx="2" fill="var(--accent)"/>
+        <text class="sval" x="626" y="97">13—15 $</text>
+
+        <text class="slab" x="8" y="140">Tarihsel orta çevrim</text>
+        <rect x="366.7" y="124" width="55.6" height="24" rx="2" fill="var(--warn)"/>
+        <text class="sval" x="432" y="141">6—8 $</text>
+
+        <line class="axis" x1="200" y1="164" x2="700" y2="164"/>
+        <text class="tick" x="200" y="182" text-anchor="middle">0</text>
+        <text class="tick" x="283.3" y="182" text-anchor="middle">3</text>
+        <text class="tick" x="366.7" y="182" text-anchor="middle">6</text>
+        <text class="tick" x="450" y="182" text-anchor="middle">9</text>
+        <text class="tick" x="533.3" y="182" text-anchor="middle">12</text>
+        <text class="tick" x="616.7" y="182" text-anchor="middle">15</text>
+        <text class="tick" x="700" y="182" text-anchor="middle">18</text>
+        <text class="tick" x="450" y="200" text-anchor="middle">net rafineri marjı — ABD doları / varil</text>
+      </svg>
+    </div>
+    <div class="cap"><b>Rehberlik iki katına çıktı, ama bandın kendisi de genişledi.</b> Şirket 13-15 dolar aralığını "sektör dinamiklerindeki dalgalanmanın sürmesi ihtimalini karşılamak" için geniş bıraktığını belirtti. Turuncu bant, marjın normalde nerede oturduğunu gösteriyor. Kaynak: şirket 2Ç26 sunumu.</div>
+  </figure>
+
+  <p>Şirket rehberliğinin geri kalanını <strong>değiştirmedi</strong>: %95-100 kapasite kullanımı, ~29 milyon ton üretim, ~30 milyon ton satış, ~700 milyon dolar yatırım harcaması. Yani hacim tarafında bir değişiklik yok — kârdaki tüm sıçrama fiyat/marj kaynaklı. Bu, iyi haberin de kötü haberin de aynı yerden geleceği anlamına geliyor.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Bilanço · 2Ç26</span>
+  <h2>Son bilanço ne söylüyor</h2>
+  <div class="h2-rule"></div>
+  <p>4 Ağustos 2026'da açıklanan altı aylık tablolar, hem gelir tablosunda hem nakit akımında bir rejim değişikliği gösteriyor. Tüm rakamlar TMS-29 enflasyon muhasebesi uygulanmış; dönemler arası karşılaştırmalar bu nedenle yaklaşıktır.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Gelir tablosu (mn TL)</th><th class="num">2026/6A</th><th class="num">2025/6A</th><th class="num">Değişim</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">Satış gelirleri</td><td class="num">662.788</td><td class="num">464.119</td><td class="num up">+%42,8</td></tr>
+        <tr><td class="lbl">Brüt kâr</td><td class="num">84.126</td><td class="num">41.988</td><td class="num up">+%100,4</td></tr>
+        <tr class="hi"><td class="lbl">FAVÖK</td><td class="num">71.246</td><td class="num">32.005</td><td class="num up">+%122,6</td></tr>
+        <tr><td class="lbl">Faaliyet kârı</td><td class="num">59.025</td><td class="num">18.161</td><td class="num up">+%225,0</td></tr>
+        <tr class="hi"><td class="lbl">Ana ortaklık net kârı</td><td class="num">49.848</td><td class="num">11.872</td><td class="num up">+%319,9</td></tr>
+        <tr><td class="lbl">Net kâr marjı</td><td class="num">%7,5</td><td class="num">%2,6</td><td class="num up">+4,9 puan</td></tr>
+        <tr><td class="lbl">Hisse başına kazanç (TL)</td><td class="num">25,87</td><td class="num">6,16</td><td class="num up">+%320</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13.5px;color:var(--ink-3);margin-top:8px">2Ç26 tek çeyrek: 45,9 milyar TL net kâr, 54,3 milyar TL FAVÖK, %14,14 FAVÖK marjı (bir yıl önce %6,12). Çeyreklik FAVÖK, önceki dört çeyreğin toplamına yaklaştı.</p>
+
+  <h3>Bilanço ve nakit</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Kalem (mn TL)</th><th class="num">2026/Ç2</th><th class="num">2026/Ç1</th><th class="num">2025/Ç2</th><th class="num">Yıllık</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td class="lbl">Nakit ve benzerleri</td><td class="num">195.841</td><td class="num">129.900</td><td class="num">90.352</td><td class="num up">+%117</td></tr>
+        <tr><td class="lbl">Toplam varlıklar</td><td class="num">859.988</td><td class="num">704.745</td><td class="num">545.630</td><td class="num up">+%58</td></tr>
+        <tr><td class="lbl">Uzun vadeli finansal borç</td><td class="num">36.443</td><td class="num">35.818</td><td class="num">31.976</td><td class="num">+%14</td></tr>
+        <tr><td class="lbl">Özkaynaklar</td><td class="num">463.307</td><td class="num">360.079</td><td class="num">311.489</td><td class="num up">+%49</td></tr>
+        <tr><td class="lbl">Cari oran</td><td class="num">1,35×</td><td class="num">1,10×</td><td class="num">1,22×</td><td class="num">—</td></tr>
+        <tr><td class="lbl">Defter değeri / pay (TL)</td><td class="num">236,73</td><td class="num">183,55</td><td class="num">159,14</td><td class="num up">+%49</td></tr>
+        <tr><td class="lbl">Net yabancı para pozisyonu</td><td class="num down">−186.334</td><td class="num down">−102.097</td><td class="num down">−99.318</td><td class="num down">açık büyüdü</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Nakit akımı (mn TL)</th><th class="num">2026/6A</th><th class="num">2025/6A</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">İşletme faaliyetlerinden net nakit</td><td class="num">132.366</td><td class="num">15.013</td></tr>
+        <tr><td class="lbl">Yatırım harcaması (capex)</td><td class="num">−11.857</td><td class="num">−10.889</td></tr>
+        <tr class="hi"><td class="lbl">Serbest nakit akım</td><td class="num">118.802</td><td class="num">3.641</td></tr>
+        <tr><td class="lbl">Ödenen temettü</td><td class="num">−21.403</td><td class="num">−20.720</td></tr>
+        <tr><td class="lbl">Dönem sonu nakit</td><td class="num">164.585</td><td class="num">96.755</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Altı ayda üretilen 118,8 milyar TL serbest nakit akım, yıllıklandırıldığında piyasa değerinin <strong>%31'ine</strong> denk geliyor. Şirketin 1Ç26'da açıkladığı 74,7 milyar TL net nakit pozisyonu, 2Ç26 nakit hareketiyle tahminen ~128 milyar TL'ye çıktı. Bu, rafineri sektörü için olağanüstü güçlü bir savunma pozisyonu — ama yine, marj zirvesinin ürünü.</p>
+
+  <div class="callout risk">
+    <span class="lead">Bilançodaki tek gerçek çatlak</span>
+    <p>Net yabancı para pozisyonu açığı bir çeyrekte 102 milyar TL'den 186 milyar TL'ye çıktı. Tüpraş'ın geliri dolara endeksli olduğu için bu doğal bir korunma sayılabilir; ancak TL'de ani bir değer kaybı, gelir tablosuna kur farkı gideri olarak hızlı ve büyük yansır. Enflasyon muhasebesiyle birleştiğinde çeyreklik net kâr kaleminin oynaklığı yüksek kalacak.</p>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Değerleme</span>
+  <h2>Fiyat hangi marjı fiyatlıyor</h2>
+  <div class="h2-rule"></div>
+  <p>Yaklaşım basit: 2026 FAVÖK'ünü senaryolara bağla, FD/FAVÖK çarpanı uygula, net nakdi ekle, pay sayısına böl. Girdiler — 1.926,8 milyon pay, 48,29 USD/TRY, ~127,7 milyar TL net nakit. Çarpan 5,0× (rafineri çevriminin tepesinde piyasa çarpanı daraltır; mevcut 5,6× zirve FAVÖK üzerinden hesaplanıyor).</p>
+
+  <figure>
+    <div class="svgbox">
+      <svg viewBox="0 0 730 316" role="img" aria-label="Senaryo bazlı adil değer: boğa 492 TL, baz 455 TL, ayı 342 TL, normalize 317 TL, sert daralma 254 TL; spot fiyat 392 TL">
+        <line class="grid" x1="258.2" y1="36" x2="258.2" y2="254"/>
+        <line class="grid" x1="356.4" y1="36" x2="356.4" y2="254"/>
+        <line class="grid" x1="454.5" y1="36" x2="454.5" y2="254"/>
+        <line class="grid" x1="552.7" y1="36" x2="552.7" y2="254"/>
+        <line class="grid" x1="650.9" y1="36" x2="650.9" y2="254"/>
+
+        <text class="slab" x="8" y="61">Boğa · 3,4 mlr $</text>
+        <rect x="160" y="44" width="483.4" height="26" rx="2" fill="var(--pos)"/>
+        <text class="sval" x="653" y="62">492 TL</text>
+
+        <text class="slab" x="8" y="105">Baz · 3,1 mlr $</text>
+        <rect x="160" y="88" width="446.5" height="26" rx="2" fill="var(--accent)"/>
+        <text class="sval" x="616" y="106">455 TL</text>
+
+        <text class="slab" x="8" y="149">Ayı · 2,2 mlr $</text>
+        <rect x="160" y="132" width="335.7" height="26" rx="2" fill="var(--warn)"/>
+        <text class="sval" x="505" y="150">342 TL</text>
+
+        <text class="slab" x="8" y="193">Normalize · 2,0 mlr $</text>
+        <rect x="160" y="176" width="311.1" height="26" rx="2" fill="var(--warn)"/>
+        <text class="sval" x="481" y="194">317 TL</text>
+
+        <text class="slab" x="8" y="237">Sert daralma · 1,5 mlr $</text>
+        <rect x="160" y="220" width="249.6" height="26" rx="2" fill="var(--neg)"/>
+        <text class="sval" x="419" y="238">254 TL</text>
+
+        <line x1="545.1" y1="36" x2="545.1" y2="258" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"/>
+        <text class="sval" x="545.1" y="28" text-anchor="middle">spot 392 TL</text>
+
+        <line class="axis" x1="160" y1="254" x2="700" y2="254"/>
+        <text class="tick" x="160" y="272" text-anchor="middle">0</text>
+        <text class="tick" x="258.2" y="272" text-anchor="middle">100</text>
+        <text class="tick" x="356.4" y="272" text-anchor="middle">200</text>
+        <text class="tick" x="454.5" y="272" text-anchor="middle">300</text>
+        <text class="tick" x="552.7" y="272" text-anchor="middle">400</text>
+        <text class="tick" x="650.9" y="272" text-anchor="middle">500</text>
+        <text class="tick" x="430" y="292" text-anchor="middle">pay başına adil değer — TL, 5,0× FD/FAVÖK</text>
+        <text class="tick" x="430" y="308" text-anchor="middle">etiketler: 2026 FAVÖK senaryosu (milyar ABD doları)</text>
+      </svg>
+    </div>
+    <div class="cap"><b>Spot fiyat, boğa ve baz senaryolarının arasında değil — ayı senaryosunun çok üzerinde duruyor.</b> Yani mevcut fiyat, marjın 2026 boyunca 12-13 dolar/varil civarında kalmasını neredeyse tam olarak varsayıyor. Orta çevrime dönüş fiyatlanmıyor.</div>
+  </figure>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Senaryo</th><th class="num">Net marj $/varil</th><th class="num">FAVÖK</th><th class="num">4,0×</th><th class="num">5,0×</th><th class="num">5,6×</th><th class="num">6,5×</th><th class="num">5,6×'te potansiyel</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lbl">Boğa — marj kalıcı</td><td class="num">14</td><td class="num">3,4 mlr $</td><td class="num">407</td><td class="num">492</td><td class="num">543</td><td class="num">620</td><td class="num up">+%38,6</td></tr>
+        <tr class="hi"><td class="lbl">Baz — şirket rehberliği</td><td class="num">13</td><td class="num">3,1 mlr $</td><td class="num">377</td><td class="num">455</td><td class="num">501</td><td class="num">571</td><td class="num up">+%27,8</td></tr>
+        <tr><td class="lbl">Ayı — hızlı normalleşme</td><td class="num">9</td><td class="num">2,2 mlr $</td><td class="num">287</td><td class="num">342</td><td class="num">375</td><td class="num">425</td><td class="num down">−%4,4</td></tr>
+        <tr><td class="lbl">Normalize — orta çevrim</td><td class="num">7</td><td class="num">2,0 mlr $</td><td class="num">267</td><td class="num">317</td><td class="num">347</td><td class="num">392</td><td class="num down">−%11,5</td></tr>
+        <tr><td class="lbl">Sert daralma</td><td class="num">5</td><td class="num">1,5 mlr $</td><td class="num">217</td><td class="num">254</td><td class="num">277</td><td class="num">311</td><td class="num down">−%29,4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <span class="lead">Olasılık ağırlıklı sonuç</span>
+    <p>Boğa %20 · Baz %30 · Ayı %25 · Normalize %20 · Sert daralma %5 ağırlıklarıyla, 5,0× çarpanda adil değer <strong>396,48 TL</strong> — spot fiyatın %1,1 üzerinde. Bağımsız olarak: 27 kurumun konsensüs hedefi <strong>396,98 TL</strong>, yurt içi 16 kurumun ortalaması 405,44 TL (aralık 346-471 TL). Üç ayrı yöntem aynı noktada buluşuyor.</p>
+  </div>
+
+  <h3>Sektöre göre konum</h3>
+  <p>XUSIN medyan F/K 14,15× iken Tüpraş 10,4× — %26 iskonto. PD/DD 1,70× ile sektör medyanının tam üzerinde. FD/Satışlar 0,91× rafineri iş modeli için normal. İskonto gerçek, ama kısmen "zirve kârına verilen düşük çarpan" — yani piyasanın marj normalleşmesini zaten kısmen fiyatladığının işareti.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Teknik</span>
+  <h2>Grafik nerede duruyor</h2>
+  <div class="h2-rule"></div>
+  <p>30 Haziran'daki 227,50 TL'den 1 Eylül'deki 417,25 TL zirvesine iki ayda <strong>%83</strong>'lük bir yükseliş. Ardından 2 Eylül'de %2,6'lık geri çekilme ve ilk destek seviyesinin kaybı. Trend sağlam, momentum yorgun.</p>
+
+  <figure>
+    <div class="svgbox">
+      <svg viewBox="0 0 730 288" role="img" aria-label="TUPRS aylık kapanış grafiği, Eylül 2025 - Eylül 2026, 186 TL'den 392 TL'ye">
+        <line class="grid" x1="48" y1="201.3" x2="696" y2="201.3"/>
+        <line class="grid" x1="48" y1="160.1" x2="696" y2="160.1"/>
+        <line class="grid" x1="48" y1="118.9" x2="696" y2="118.9"/>
+        <line class="grid" x1="48" y1="77.7" x2="696" y2="77.7"/>
+        <line class="grid" x1="48" y1="36.5" x2="696" y2="36.5"/>
+        <text class="tick" x="42" y="205" text-anchor="end">200</text>
+        <text class="tick" x="42" y="164" text-anchor="end">250</text>
+        <text class="tick" x="42" y="123" text-anchor="end">300</text>
+        <text class="tick" x="42" y="82" text-anchor="end">350</text>
+        <text class="tick" x="42" y="40" text-anchor="end">400</text>
+
+        <path d="M48,212.4 L102,203.2 L156,205.6 L210,214.1 L264,164.4 L318,186.0 L372,153.3 L426,142.8 L480,171.4 L534,178.6 L588,122.8 L642,36.3 L696,42.9 L696,226 L48,226 Z" fill="var(--accent)" opacity="0.10"/>
+        <path d="M48,212.4 L102,203.2 L156,205.6 L210,214.1 L264,164.4 L318,186.0 L372,153.3 L426,142.8 L480,171.4 L534,178.6 L588,122.8 L642,36.3 L696,42.9" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+        <circle cx="642" cy="36.3" r="4" fill="var(--accent)"/>
+        <circle cx="696" cy="42.9" r="5" fill="var(--ink)"/>
+        <text class="sval" x="696" y="26" text-anchor="end">392,25</text>
+
+        <line class="axis" x1="48" y1="226" x2="696" y2="226"/>
+        <text class="tick" x="48" y="244" text-anchor="middle">Eyl 25</text>
+        <text class="tick" x="156" y="244" text-anchor="middle">Kas</text>
+        <text class="tick" x="264" y="244" text-anchor="middle">Oca 26</text>
+        <text class="tick" x="372" y="244" text-anchor="middle">Mar</text>
+        <text class="tick" x="480" y="244" text-anchor="middle">May</text>
+        <text class="tick" x="588" y="244" text-anchor="middle">Tem</text>
+        <text class="tick" x="696" y="244" text-anchor="middle">Eyl 26</text>
+        <text class="tick" x="372" y="266" text-anchor="middle">aylık kapanış — TL, bölünme düzeltilmiş</text>
+        <text class="tick" x="372" y="282" text-anchor="middle">12 aylık getiri: +%110 (TL) · +%87 (USD) — aynı dönemde Brent +%55 (USD)</text>
+      </svg>
+    </div>
+    <div class="cap"><b>Yükselişin tamamı son iki ayda gerçekleşti.</b> Ocak-Haziran arası 185-280 TL bandında yatay seyreden hisse, 2Ç26 bilançosu ve marj revizyonuyla bandı yukarı kırdı. Grafiğin altında geniş bir boşluk var — geri çekilmeler hızlı olabilir.</div>
+  </figure>
+
+  <h3>Gösterge tablosu</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Gösterge</th><th class="num">Değer</th><th class="num">Fiyata uzaklık</th><th>Sinyal</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">EMA-20</td><td class="num">385,26</td><td class="num">−%1,8</td><td><span class="pill p-pos">Fiyat üzerinde</span></td></tr>
+        <tr><td class="lbl">SMA-20</td><td class="num">372,35</td><td class="num">−%5,1</td><td><span class="pill p-pos">Fiyat üzerinde</span></td></tr>
+        <tr><td class="lbl">EMA-50</td><td class="num">365,01</td><td class="num">−%7,0</td><td><span class="pill p-pos">Fiyat üzerinde</span></td></tr>
+        <tr><td class="lbl">RSI-14</td><td class="num">67,29</td><td class="num">—</td><td><span class="pill p-warn">Aşırı alıma yakın</span></td></tr>
+        <tr><td class="lbl">MACD / sinyal</td><td class="num">20,25 / 19,69</td><td class="num">—</td><td><span class="pill p-pos">Al konumunda</span></td></tr>
+        <tr><td class="lbl">MACD histogram</td><td class="num">+0,55</td><td class="num">—</td><td><span class="pill p-warn">Daralıyor</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Fiyat üç hareketli ortalamanın da üzerinde — trend teknik olarak pozitif. Ama MACD histogramının +0,55'e daralması, ivmenin kesildiğini gösteriyor: yükseliş devam ediyor, hızı düşüyor. RSI 67 ile aşırı alım sınırının hemen altında; bu, yeni pozisyon açmak için tarihsel olarak kötü bir giriş bölgesidir.</p>
+
+  <h3>Seviyeler</h3>
+  <div class="ladder">
+    <div class="rung res"><span class="px">430,58</span><span class="why">R3 — yeni bir marj katalizörü olmadan zorlu</span><span class="dist">+%9,8</span></div>
+    <div class="rung res"><span class="px">423,92</span><span class="why">R2 — zirve üstü hedef</span><span class="dist">+%8,1</span></div>
+    <div class="rung res"><span class="px">417,25</span><span class="why">52 hafta zirvesi, 01.09'da test edildi</span><span class="dist">+%6,4</span></div>
+    <div class="rung res"><span class="px">413,33</span><span class="why">R1 — ilk ciddi satış bölgesi</span><span class="dist">+%5,4</span></div>
+    <div class="rung res"><span class="px">406,67</span><span class="why">Pivot — bugün kaybedildi, geri alınması gerek</span><span class="dist">+%3,7</span></div>
+    <div class="rung res"><span class="px">396,08</span><span class="why">S1 — bugün aşağı kırıldı, artık direnç</span><span class="dist">+%1,0</span></div>
+    <div class="rung now"><span class="px">392,25</span><span class="why">Kapanış · 02.09.2026</span><span class="dist">—</span></div>
+    <div class="rung sup"><span class="px">389,42</span><span class="why">S2 — fiyatın hemen altında, kritik</span><span class="dist">−%0,7</span></div>
+    <div class="rung sup"><span class="px">384,50</span><span class="why">Koç blok satış fiyatı — psikolojik zemin</span><span class="dist">−%2,0</span></div>
+    <div class="rung sup"><span class="px">378,83</span><span class="why">S3 — birinci alım kademesi</span><span class="dist">−%3,4</span></div>
+    <div class="rung sup"><span class="px">372,35</span><span class="why">SMA-20 — ikinci alım kademesi</span><span class="dist">−%5,1</span></div>
+    <div class="rung sup"><span class="px">365,01</span><span class="why">EMA-50 — üçüncü kademe; kaybı trendi bozar</span><span class="dist">−%7,0</span></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Haber akışı</span>
+  <h2>Yakın dönemde ne oldu</h2>
+  <div class="h2-rule"></div>
+  <ul class="tl">
+    <li class="neg">
+      <span class="when">2 Eylül 2026</span>
+      <span class="what">Koç Holding ve Temel Ticaret'ten blok pay satışı</span>
+      <p>Toplam ~%0,83 pay, 1 TL nominal başına <strong>384,50 TL</strong>'den, yaklaşık 6,16 milyar TL büyüklüğünde toptan satış. BofA aracılığıyla 2 Eylül'de BİST'e başvuru; işlemin 3 Eylül'de gerçekleşmesi, takasın 7 Eylül'de tamamlanması bekleniyor. Sonrasında Koç'un doğrudan payı %3,7'ye, Koç + Enerji Yatırımları toplamı %50,1'e iniyor; halka açıklık %49,7'ye çıkıyor. Kısa vadede arz baskısı ve 384,50 TL'lik bir fiyat çıpası yaratıyor.</p>
+    </li>
+    <li>
+      <span class="when">4 Ağustos 2026</span>
+      <span class="what">2Ç26 bilançosu beklentileri ezdi</span>
+      <p>FAVÖK 54,34 milyar TL ile beklentiyi %41,4; net kâr 45,88 milyar TL ile beklentiyi %51,7 aştı. Hisse başına kazanç 19,49 TL beklentiye karşı 36,04 TL geldi. FAVÖK marjı 802 baz puan genişleyerek %14,14'e çıktı.</p>
+    </li>
+    <li>
+      <span class="when">4 Ağustos 2026</span>
+      <span class="what">Net rafineri marjı rehberliği ikiye katlandı</span>
+      <p>6-7 dolar/varilden 13-15 dolar/varile revize edildi. Kapasite kullanımı (%95-100), üretim (~29 mn ton), satış (~30 mn ton) ve capex (~700 mn $) hedefleri değişmedi. Piyasanın 2026 FAVÖK tahmini 2,4 milyar dolardan 3,1 milyar dolara yükseldi.</p>
+    </li>
+    <li>
+      <span class="when">Ağustos 2026</span>
+      <span class="what">16 aracı kurum hedef fiyatını güncelledi</span>
+      <p>Ortalama 405,44 TL; en düşük 346,00 TL, en yüksek 470,90 TL. Vakıf Yatırım 510 TL hedefle "AL" tavsiyesiyle takibe başladı. Uluslararası konsensüs: 20 AL, 7 TUT, 0 SAT — ortalama hedef 396,98 TL.</p>
+    </li>
+    <li>
+      <span class="when">Haziran 2026</span>
+      <span class="what">Akdeniz'de rafineri marjı şoku</span>
+      <p>Hayfa'daki 197 bin varil/gün kapasiteli rafineriye yapılan saldırı sonrası bölgesel ürün piyasası sıkıştı; dizel crack spread ~45 dolar/varile çıktı (önceki çeyrek ortalaması 27,7 dolar). Avrupa'nın yapısal dizel açığı marjı destekliyor.</p>
+    </li>
+    <li class="neu">
+      <span class="when">1 Eylül 2026</span>
+      <span class="what">Entek Elektrik sermaye artırımı</span>
+      <p>Bağlı ortaklık Entek'in sermayesi 2,065 milyar TL'den 2,5 milyar TL artışla 4,565 milyar TL'ye çıkarılıyor. Yatırım finansmanı ve mali yapının güçlendirilmesi amaçlı — Tüpraş'ın enerji tarafındaki yatırımlarının sürdüğünü gösteriyor.</p>
+    </li>
+    <li class="neu">
+      <span class="when">30 Eylül 2026</span>
+      <span class="what">İkinci temettü taksiti — hak kullanımı</span>
+      <p>13 milyar TL dağıtım: brüt 6,7469 TL/pay, net 5,7349 TL/pay. Ödeme 2 Ekim. 2026 toplamı 33 milyar TL — brüt 17,13 TL/pay. 30 Eylül'de fiyatta mekanik bir düzeltme olacak.</p>
+    </li>
+    <li class="neu">
+      <span class="when">29 Ekim 2026</span>
+      <span class="what">3Ç26 bilançosu — bir sonraki sınav</span>
+      <p>Asıl soru: 2Ç26'daki 54,3 milyar TL'lik FAVÖK ne kadar tekrarlanabilir. Marjın 3. çeyrekte nerede seyrettiği, tüm değerleme senaryosunu belirleyecek.</p>
+    </li>
+  </ul>
+</section>
+
+<section>
+  <span class="eyebrow">Riskler</span>
+  <h2>Ne ters gidebilir</h2>
+  <div class="h2-rule"></div>
+  <ul>
+    <li><strong>Marj normalleşmesi (en yüksek olasılıklı risk).</strong> 13-15 dolar/varil, jeopolitik arz kesintisinin ürünü. Hayfa kapasitesi devreye girer veya Avrupa dizel dengesi gevşerse marj hızla 8-10 dolara döner. Analistlerin bir kısmı yıl geneli için zaten ~10 dolar varsayıyor. Bu senaryoda adil değer 342-375 TL bandına iner.</li>
+    <li><strong>Analist hedefine değmiş fiyat.</strong> Konsensüs 397 TL, spot 392 TL. Yukarı revizyon gelmezse hisse teknik olarak yukarı çekecek yakıt bulamaz. Yeni hedef artışları 3Ç26 bilançosuna bağlı.</li>
+    <li><strong>Blok satış ve arz.</strong> 6,16 milyar TL'lik satış 384,50 TL'den yapıldı — spot'un altında. Halka açıklık %49,7'ye çıkıyor; kısa vadede ek satış baskısı ve fiyat çıpası anlamına geliyor. Koç'un ileride yeniden pay satma ihtimali de bir gölge olarak kalıyor.</li>
+    <li><strong>Ham petrol seviyesi.</strong> Brent 94,33 dolar — yıl başından beri %55 yukarıda. Yüksek ham petrol işletme sermayesi ihtiyacını artırır; ani bir düşüş ise stok değer düşüş zararı yazdırır. Rafinerici için önemli olan petrolün seviyesi değil crack spread'tir, ama seviye nakit döngüsünü etkiler.</li>
+    <li><strong>Kur ve enflasyon muhasebesi.</strong> 186 milyar TL'lik net kısa döviz pozisyonu ve TMS-29 düzeltmeleri, çeyreklik net kârı hem oynak hem karşılaştırması zor hale getiriyor. Temmuz TÜFE'si %31,75 — reel getiri eşiği yüksek.</li>
+    <li><strong>Temettü kesintisi.</strong> 30 Eylül'de brüt 6,75 TL/pay'lık mekanik düşüş (~%1,7). Fiyat hedeflerinizi bu tarihe göre ayarlayın.</li>
+  </ul>
+</section>
+
+<section>
+  <span class="eyebrow">Uygulama</span>
+  <h2>Somut plan</h2>
+  <div class="h2-rule"></div>
+  <p>Ayırmayı planladığınız tutarı üçe bölün ve seviyelere yerleştirin. Spot'tan tam pozisyon açmak, yukarıdaki senaryo tablosuna göre risk/getiri açısından savunulabilir değil.</p>
+
+  <div class="plan">
+    <div class="step">
+      <span class="band">385-378 TL</span>
+      <div class="body">
+        <h4>Birinci kademe · planlanan tutarın %30'u</h4>
+        <p>S2 (389,42) ile S3 (378,83) arası. Blok satış fiyatı olan 384,50 TL bu bandın içinde — kurumsal alıcının kabul ettiği fiyat. Takas 7 Eylül'de tamamlandıktan sonra girmek daha temiz olur.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="band">375-370 TL</span>
+      <div class="body">
+        <h4>İkinci kademe · %35</h4>
+        <p>SMA-20 (372,35) bölgesi. Ağustos rallisinin ilk sağlıklı geri testi burasıdır. 30 Eylül temettü kesintisi fiyatı mekanik olarak buraya yaklaştırabilir — hakkı almak isterseniz kesintiden önce, almak zorunda değilseniz sonrasında girin.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="band">368-362 TL</span>
+      <div class="body">
+        <h4>Üçüncü kademe · %35</h4>
+        <p>EMA-50 (365,01) bölgesi. Orta vadeli trendin sınırı. Buradan alım, baz senaryoda (455 TL) %25 civarı bir getiri potansiyeli sunar ve normalize senaryoda (317 TL) kaybı sınırlar.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="band">&lt; 358 TL</span>
+      <div class="body">
+        <h4>Tez kontrolü — otomatik alım yok</h4>
+        <p>EMA-50'nin kapanış bazında kaybı teknik trendi bozar. Buraya inilirse "ucuzladı" diye eklemek yerine sebebi araştırın: marj mı geriledi, blok satış mı devam ediyor, yoksa endeks geneli mi? Sebep marj ise senaryo tablosunda bir kademe aşağı inin.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="band">417+ TL</span>
+      <div class="body">
+        <h4>Yukarı kırılım senaryosu</h4>
+        <p>52 hafta zirvesinin hacimli kapanışla aşılması, piyasanın marj kalıcılığını fiyatladığı anlamına gelir. O durumda küçük bir başlangıç pozisyonu (%20) açıp gerisini geri çekilmeye bırakmak, tamamen dışarıda kalmaktan iyidir.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="lead">İzleme listesi</span>
+    <p><strong>1.</strong> Aylık dizel crack spread ve Akdeniz kompleks marjı — tezin tek gerçek dayanağı. <strong>2.</strong> 29 Ekim 3Ç26 bilançosu: FAVÖK 40 milyar TL'nin altına inerse baz senaryo çöker. <strong>3.</strong> Koç Holding'in ek pay satışı yönünde KAP bildirimi. <strong>4.</strong> Kapasite kullanım oranının %95'in altına inmesi (planlı bakım dışında). <strong>5.</strong> Şirketin marj rehberliğini yıl sonuna doğru yeniden revize etmesi — her iki yöne de.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <h3>Veri kaynakları</h3>
+  <ul>
+    <li>Fiyat, teknik göstergeler, rasyolar, finansal tablolar, kurumsal işlemler, analist konsensüsü ve makro veri: <strong>borsa MCP konnektörü</strong> (yfinance · borsapy · İş Yatırım · TCMB · TradingView), 2 Eylül 2026 kapanışı.</li>
+    <li>2Ç26 bilanço detayları ve şirket rehberliği: <a href="https://arastirma.isyatirim.com.tr/2026/08/05/tuprs-is-tupras-2c26-sonuclari/">İş Yatırım — Tüpraş 2Ç26 Sonuçları</a>, <a href="https://www.bloomberght.com/tupras-in-krliligi-ikinci-ceyrekte-sicradi-3784717">BloombergHT</a>, <a href="https://www.forbes.com.tr/para-yatirim/savasin-etkisiyle-tupras-in-ikinci-ceyrek-kari-dorde-katlandi">Forbes Türkiye</a>, <a href="https://hibya.com/tupras-net-rafineri-marji-beklentisini-yukseltti-992730">Hibya — marj rehberliği revizyonu</a>.</li>
+    <li>Koç Holding blok pay satışı: <a href="https://www.ekonomim.com/sirketler/koc-holdingden-tuprasta-hisse-satisi-karari-haberi-915695">Ekonomim</a>, <a href="https://www.cagdaskocaeli.com.tr/haber/28625567/koc-holding-tupras-hisse-satisi-merrill-lynch-kocaeli-tesisi-kap-aciklamasi">Çağdaş Kocaeli</a>, <a href="https://rotaborsa.com/koc-holdingden-kchol-tuprasta-tuprs-hisse-satis-karari/">Rota Borsa</a>.</li>
+    <li>Hedef fiyatlar: <a href="https://rotaborsa.com/tupras-tuprs-guncel-hedef-fiyatlari/">Rota Borsa — güncel hedef fiyat listesi</a>, <a href="https://www.ziraatyatirim.com.tr/rapor/TUPRS">Ziraat Yatırım</a>.</li>
+    <li>Rafineri marjları ve crack spread: <a href="https://www.qnbinvest.com.tr/investodak/qnbarastirma/tupras-tuprs-icin-petrol-fiyatlari-ve-rafineri-marji-analizi">QNB Invest</a>, <a href="https://hedeffiyat.com.tr/blog/tupras-analizi-artan-rafineri-marjlari-hedef-fiyatlari-nasil-yukari-tasidi-17">Hedef Fiyat</a>.</li>
+    <li>Temettü takvimi: <a href="https://infoyatirim.com/blog/temettu/tupras-tuprs-2026-temettu-kararini-acikladi">Info Yatırım</a>, <a href="https://kap.org.tr/tr/sirket-bilgileri/genel/1105-tupras-turkiye-petrol-rafinerileri-a-s">KAP</a>.</li>
+  </ul>
+  <div class="disclaim">
+    <strong>Uyarı.</strong> Bu belge yatırım danışmanlığı değildir. Kamuya açık verilerden derlenmiş bir analiz ve senaryo çalışmasıdır; burada yer alan görüşler kişisel mali durumunuza, risk toleransınıza veya yatırım vadenize göre uyarlanmamıştır. Hisse senedi yatırımı anapara kaybı riski taşır. Senaryolardaki FAVÖK ve çarpan varsayımları tahmindir ve gerçekleşmeyebilir. Karar vermeden önce kendi araştırmanızı yapın veya yetkili bir yatırım kuruluşuna danışın.
+  </div>
+</footer>
+
+</div>
