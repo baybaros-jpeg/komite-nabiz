@@ -13,6 +13,25 @@ hatalı davranışa yol açıyordu.
 Bu depo, çalışma saatleri boyunca 10 dakikada bir iki arka ucu da yokluyor. Böylece
 servisler uyumuyor ve kimse 30 saniye beklemiyor.
 
+## Neden GitHub'ın saatine güvenmiyoruz (2026-09-20)
+
+İlk sürüm `*/10 9-18 * * *` yazıp işi GitHub'ın 10 dakikada bir tetiklemesine
+bırakıyordu. **GitHub zamanlanmış işleri yoğunlukta sessizce düşürüyor.** 27 Ağustos
+2026'dan itibaren günde beklenen 60 koşu yerine yalnızca **2-4** tanesi çalıştı:
+
+| Tarih | Koşu sayısı |
+|---|---|
+| 22-25 Ağustos | 23, 23, 15, 15 |
+| 27 Ağustos → 19 Eylül | **günde 2-4** |
+
+Sonuç: arka uçlar pencere içinde bile 2,5 saat uyudu. Üstelik 19 Eylül'de bir koşu
+**23:57**'de, yani pencere kapandıktan sonra çalışıp boşa kota yaktı.
+
+Artık tetiklemenin kaç kez geldiği önemli değil. İş hangi saatte başlarsa başlasın
+**kendi içinde döngü kurup** 10 dakikada bir yokluyor ve pencere bitene kadar ayakta
+kalıyor. Cron saat başı deniyor; biri tutarsa o gün için yeter, kaçarsa bir sonraki
+devralır. Pencere kapandıktan sonra başlayan koşu hiç yoklama yapmadan çıkar.
+
 ## Neden 10 saat, daha fazlası değil
 
 Render ücretsiz katmanı **ayda 750 örnek-saati** veriyor ve bu kota servis başına
@@ -46,6 +65,18 @@ Actions sekmesi → **Nabız** → **Run workflow**.
 
 ## Saat penceresini değiştirmek
 
-`.github/workflows/nabiz.yml` içindeki `cron` satırı. GitHub UTC kullanır,
-Türkiye UTC+3'tür: `9-18` UTC = 12:00–21:59 Türkiye saati.
+İki yer birden değişir:
+
+1. `.github/workflows/nabiz.yml` içindeki `cron` satırı — işin ne zaman
+   **başlayabileceği**. GitHub UTC kullanır, Türkiye UTC+3'tür:
+   `9-18` UTC = 12:00–21:59 Türkiye saati.
+2. Aynı dosyadaki `bitis=$(TZ=Europe/Istanbul date -d 'today 22:00' ...)` satırı —
+   döngünün **ne zaman duracağı**. Asıl pencereyi bu belirler.
+
 Pencereyi genişletmeden önce yukarıdaki kota tablosuna bak.
+
+## Bir koşu neden saatlerce sürüyor
+
+Sürmesi gerekiyor: iş uyanık tutmak için bekliyor. GitHub'ın iş başına sınırı 6
+saattir, biz 5 sa 50 dk'da kendimiz çıkıyoruz. Depo public olduğu için Actions
+dakikası sınırsız, bu bekleme hiçbir kotayı yemiyor.

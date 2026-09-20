@@ -1,64 +1,108 @@
 name: Nabız
 
-# GitHub cron UTC calisir. Turkiye UTC+3 oldugu icin:
-#   09-18 UTC  =  12:00 - 21:59 Turkiye saati  (gunde 10 saat)
+# NEDEN BOYLE YAZILDI (2026-09-20)
 #
-# Neden 10 saat: Render ucretsiz katmani calisma alanina AYDA 750 ornek-saati
-# veriyor ve bu kota servis basina degil, hesabin tamami icin. Iki arka uc
-# 10 sa/gun x 30 gun = 600 saat eder; 150 saat marj kalir. 12 saate cikarsak
-# 720 saat olur ve marj 30 saate duser; kota biterse Render TUM ucretsiz
-# servisleri ay sonuna kadar askiya alir.
+# Eski surum "*/10 9-18 * * *" ile 10 dakikada bir calisacak sekilde
+# ayarlanmisti. GitHub zamanlanmis isleri yogunlukta DUSURUYOR: 27 Agustos
+# 2026'dan itibaren gunde beklenen 60 koşu yerine yalnizca 2-4 tanesi
+# calisti, yani arka uclar pencere icinde bile 2,5 saat uyudu.
 #
-# Neden 10 dakikada bir: Render 15 dakika hareketsizlikte servisi uyutuyor.
+# Cozum: GitHub'in kac kez tetikledigine guvenmiyoruz. Tetikleme hangi saatte
+# gelirse gelsin, is ICERIDE dongu kurup 10 dakikada bir yokluyor ve pencere
+# bitene kadar ayakta kaliyor. Bir tetikleme kacsa bile digeri devralir.
+#
+#   09-18 UTC = 12:00-21:59 Turkiye saati (gunde 10 saat)
+#   Render kotasi: hesap basina ayda 750 ornek-saati.
+#   2 arka uc x 10 sa/gun x 30 gun = 600 saat, 150 saat marj kalir.
+#   Pencereyi genisletmeden once bu hesabi tekrar yap.
+#
+# concurrency: ayni anda iki dongu calismasin. Calisan is bitince sirada
+# bekleyen devralir, boylece 6 saatlik is siniri pencereyi bolmez.
 
 on:
   schedule:
-    - cron: "*/10 9-18 * * *"
+    - cron: "3 9-18 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: nabiz
+  cancel-in-progress: false
+
 jobs:
   yokla:
-    name: Arka uclari yokla
+    name: Arka uclari uyanik tut
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    # GitHub'in is basina siniri 6 saat; 5 sa 50 dk'da kendimiz cikiyoruz.
+    timeout-minutes: 355
 
     steps:
-      - name: Yoklama
+      - name: Dongu
         run: |
           set -u
-          hatali=0
+
+          MTP_URL=https://itso-secim-api.onrender.com/api/
+          MOG_URL=https://mobilya-oturma-grubu-api.onrender.com/api/
+
+          simdi=$(date +%s)
+          bitis=$(TZ=Europe/Istanbul date -d 'today 22:00' +%s)
+          tavan=$((simdi + 350 * 60))
+          hedef=$(( bitis < tavan ? bitis : tavan ))
+
+          echo "Baslangic : $(TZ=Europe/Istanbul date '+%Y-%m-%d %H:%M %Z')"
+          echo "Pencere sonu: $(TZ=Europe/Istanbul date -d @"$bitis" '+%H:%M')"
+
+          if [ "$simdi" -ge "$bitis" ]; then
+            echo "Pencere kapali, yapacak bir sey yok."
+            exit 0
+          fi
+
+          mtp_hata=0
+          mog_hata=0
 
           yokla() {
             ad="$1"; url="$2"
-            # Uyandirma 30 sn+ surebilir, o yuzden cömert bir zaman asimi.
             cikti=$(curl -sS -o /dev/null \
                       -w '%{http_code} %{time_total}' \
                       --max-time 120 "$url" 2>/dev/null || echo "000 0")
             kod="${cikti%% *}"; sure="${cikti##* }"
 
             if [ "$kod" = "200" ]; then
-              # 5 saniyeden uzun surduyse servis uykudan uyanmis demektir
               uyari=""
+              # 5 saniyeden uzun surduyse servis uykudan uyanmis demektir
               case "$sure" in
                 [5-9].*|[1-9][0-9].*) uyari="  <- uykudan uyandi" ;;
               esac
-              printf '  OK    %-5s %ss%s\n' "$ad" "$sure" "$uyari"
-            else
-              printf '  HATA  %-5s durum=%s sure=%ss\n' "$ad" "$kod" "$sure"
-              hatali=$((hatali + 1))
+              printf '  OK    %-4s %ss%s\n' "$ad" "$sure" "$uyari"
+              return 0
             fi
+            printf '  HATA  %-4s durum=%s sure=%ss\n' "$ad" "$kod" "$sure"
+            return 1
           }
 
-          echo "Yoklama — $(TZ=Europe/Istanbul date '+%Y-%m-%d %H:%M %Z')"
-          yokla MTP https://itso-secim-api.onrender.com/api/
-          yokla MOG https://mobilya-oturma-grubu-api.onrender.com/api/
+          while :; do
+            echo "-- $(TZ=Europe/Istanbul date '+%H:%M')"
 
-          if [ "$hatali" -gt 0 ]; then
-            echo
-            echo "$hatali servis yanit vermedi."
-            echo "GitHub bu basarisizligi e-posta ile bildirir."
-            exit 1
-          fi
+            if yokla MTP "$MTP_URL"; then mtp_hata=0; else mtp_hata=$((mtp_hata + 1)); fi
+            if yokla MOG "$MOG_URL"; then mog_hata=0; else mog_hata=$((mog_hata + 1)); fi
+
+            # Tek seferlik hata gecici olabilir; ust uste ikisi gercek kesintidir.
+            # O anda cikiyoruz ki e-posta gec degil, hemen gelsin. Sirada bekleyen
+            # kosu devralip uyanik tutmayi surdurur.
+            if [ "$mtp_hata" -ge 2 ] || [ "$mog_hata" -ge 2 ]; then
+              echo
+              echo "Bir arka uc ust uste iki yoklamada yanit vermedi."
+              echo "GitHub bu basarisizligi e-posta ile bildirir."
+              exit 1
+            fi
+
+            kalan=$((hedef - $(date +%s)))
+            if [ "$kalan" -le 60 ]; then
+              echo
+              echo "Pencere/sure doldu, temiz cikis."
+              exit 0
+            fi
+            [ "$kalan" -lt 600 ] && sleep "$kalan" || sleep 600
+          done
