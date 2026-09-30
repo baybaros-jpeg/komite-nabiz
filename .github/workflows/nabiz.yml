@@ -16,12 +16,17 @@ name: Nabız
 #   2 arka uc x 10 sa/gun x 30 gun = 600 saat, 150 saat marj kalir.
 #   Pencereyi genisletmeden once bu hesabi tekrar yap.
 #
+# SECIM DONEMI (2026-09-30): 3 Ekim secimi icin 4 Ekim 00:00'a kadar 7/24
+# acik. O tarihten sonra betik kendiliginden eski 12:00-22:00 penceresine
+# doner (cron her saat dener ama pencere disindaki kosular hemen cikar).
+#   Kota: 1-3 Ekim 2x24x3 = 144 sa + 4-31 Ekim 2x10x28 = 560 sa = ~704 sa.
+#
 # concurrency: ayni anda iki dongu calismasin. Calisan is bitince sirada
 # bekleyen devralir, boylece 6 saatlik is siniri pencereyi bolmez.
 
 on:
   schedule:
-    - cron: "3 9-18 * * *"
+    - cron: "3 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -47,12 +52,26 @@ jobs:
           MOG_URL=https://mobilya-oturma-grubu-api.onrender.com/api/
 
           simdi=$(date +%s)
-          bitis=$(TZ=Europe/Istanbul date -d 'today 22:00' +%s)
           tavan=$((simdi + 350 * 60))
-          hedef=$(( bitis < tavan ? bitis : tavan ))
+          secim_sonu=$(TZ=Europe/Istanbul date -d '2026-10-04 00:00' +%s)
 
           echo "Baslangic : $(TZ=Europe/Istanbul date '+%Y-%m-%d %H:%M %Z')"
-          echo "Pencere sonu: $(TZ=Europe/Istanbul date -d @"$bitis" '+%H:%M')"
+
+          if [ "$simdi" -lt "$secim_sonu" ]; then
+            # Secim donemi: 7/24. Is 5 sa 50 dk'da cikar, siradaki devralir.
+            bitis=$tavan
+            [ "$secim_sonu" -lt "$bitis" ] && bitis=$secim_sonu
+            echo "Secim donemi: 7/24 acik (4 Ekim 00:00'a kadar)"
+          else
+            baslangic=$(TZ=Europe/Istanbul date -d 'today 12:00' +%s)
+            bitis=$(TZ=Europe/Istanbul date -d 'today 22:00' +%s)
+            if [ "$simdi" -lt "$baslangic" ]; then
+              echo "Pencere henuz acilmadi (12:00), yapacak bir sey yok."
+              exit 0
+            fi
+          fi
+          hedef=$(( bitis < tavan ? bitis : tavan ))
+          echo "Bu kosunun sonu: $(TZ=Europe/Istanbul date -d @"$hedef" '+%d.%m %H:%M')"
 
           if [ "$simdi" -ge "$bitis" ]; then
             echo "Pencere kapali, yapacak bir sey yok."
