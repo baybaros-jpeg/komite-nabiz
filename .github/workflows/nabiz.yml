@@ -104,7 +104,9 @@ jobs:
           while :; do
             echo "-- $(TZ=Europe/Istanbul date '+%H:%M')"
 
-            if yokla MTP "$MTP_URL"; then mtp_hata=0; else mtp_hata=$((mtp_hata + 1)); fi
+            # MTP 4 Ekim 2026'da yayindan kaldirildi (Render askida). Geri acilinca
+            # asagidaki satirin basindaki # kaldirilir.
+            # if yokla MTP "$MTP_URL"; then mtp_hata=0; else mtp_hata=$((mtp_hata + 1)); fi
             if yokla MOG "$MOG_URL"; then mog_hata=0; else mog_hata=$((mog_hata + 1)); fi
 
             # Tek seferlik hata gecici olabilir; ust uste ikisi gercek kesintidir.
